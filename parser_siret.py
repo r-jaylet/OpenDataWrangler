@@ -44,10 +44,27 @@ class Siret:
         """
 
         logging.info("Process SIRET")
-        
-        try:
-            siret_df = download_file_sirene('Etablissement')
 
+        try:
+            # checks if document is present in file. If not, triggers the 'download()' function
+            document = ''
+            file_path = ''
+            filename_csv =''
+
+            try:
+                with open(file_path, 'r') as file:
+                    if document not in file.read():
+                        download_file_sirene('Etablissement')
+            except FileNotFoundError:
+                download_file_sirene('Etablissement')
+
+            siret_df = pd.read_csv(filename_csv,
+                        dtype={'siren': str,
+                                'trancheEffectifsUniteLegale': str,
+                                'categorieJuridiqueUniteLegale': str,
+                                'nicSiegeUniteLegale': str,
+                                'activiteUniteLegale': str},
+                        sep=',', nrows=100000)
             if siret_df is not None:
 
                 # élimination des unités purgées et cessées

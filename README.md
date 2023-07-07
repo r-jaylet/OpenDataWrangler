@@ -2,6 +2,11 @@
 
 Ce repo vise à faciliter la manipulation et le prétraitement des ensembles de données ouvertes provenant des institutions publiques françaises. Il fournit un ensemble d'outils qui simplifient le processus de travail avec ces ensembles de données. Le référentiel se concentre sur des tâches telles que le nettoyage des données, la transformation des données et la préparation des données afin de s'assurer que les ensembles de données ouvertes sont structurés et utilisables.
 
+Ce repo est suvibisé en 2 parties :
+- **utils** : un ensemble d'outils pour faciliter la manipulation des données
+- **parsers** : un ensemble de scripts pour préparer les données des différentes sources
+
+Chaque table open data est accompagnée d'un script de parsing qui permet de préparer les données pour l'analyse. Les scripts de parsing sont écrits en Python et utilisent les outils de la partie utils.
 
 # Présentation des tables open data
 

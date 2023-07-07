@@ -46,8 +46,26 @@ class Siren:
         logging.info("Process SIREN")
 
         try:
-            siren_df = download_file_sirene('UniteLegale')
+            # checks if document is present in file. If not, triggers the 'download()' function
+            document = ''
+            file_path = ''
+            filename_csv =''
 
+            try:
+                with open(file_path, 'r') as file:
+                    if document not in file.read():
+                        download_file_sirene('UniteLegale')
+            except FileNotFoundError:
+                download_file_sirene('UniteLegale')
+
+            siren_df = pd.read_csv(filename_csv,
+                        dtype={'siren': str,
+                                'trancheEffectifsUniteLegale': str,
+                                'categorieJuridiqueUniteLegale': str,
+                                'nicSiegeUniteLegale': str,
+                                'activiteUniteLegale': str},
+                        sep=',', nrows=100000)
+            
             if siren_df is not None:
 
                 # élimination des unités purgées et cessées
