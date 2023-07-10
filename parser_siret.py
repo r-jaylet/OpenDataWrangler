@@ -10,6 +10,7 @@
 
 """
 import logging
+import os
 import sys
 
 import pandas as pd
@@ -27,9 +28,13 @@ logging.basicConfig(level=logging.INFO)
 
 class Siret:
 
-    def __init__(self):
+    def __init__(self,
+                 path_root: str = r".",
+                 file_name: str = "StockEtablissement_utf8.csv",):
         """constructor
         """
+        self.path_root = path_root
+        self.file_name = file_name
 
         # chargement initial des dictionnaires
         self.siret_df = self.load_siret_df()
@@ -46,29 +51,32 @@ class Siret:
         logging.info("Process SIRET")
 
         try:
-            # checks if document is present in file. If not, triggers the 'download()' function
-            document = ''
-            file_path = ''
-            filename_csv =''
 
+            # checks if document is present in file. If not, triggers the download function
             try:
-                with open(file_path, 'r') as file:
-                    if document not in file.read():
-                        download_file_sirene('Etablissement')
-            except FileNotFoundError:
-                download_file_sirene('Etablissement')
+                if self.file_name not in os.listdir(self.path_root):
+                    logging.info("Download Siret")
+                    download_file_sirene(self.path_root, 'Etablissement')
+                else:
+                    logging.info("Siret already downloaded")
+            except:
+                logging.info("Download Siret")
+                download_file_sirene(self.path_root, 'Etablissement')
 
-            siret_df = pd.read_csv(filename_csv,
+            logging.info("Upload Siret")
+            path_file = os.path.join(self.path_root, self.file_name)
+            siret_df = pd.read_csv(path_file,
                         dtype={'siren': str,
                                 'trancheEffectifsUniteLegale': str,
                                 'categorieJuridiqueUniteLegale': str,
                                 'nicSiegeUniteLegale': str,
                                 'activiteUniteLegale': str},
-                        sep=',', nrows=100000)
-            if siret_df is not None:
+                        sep=',', nrows=10000)
 
+            if siret_df is not None:
+                logging.info("Processing Siret")
                 # élimination des unités purgées et cessées
-                siret_df = self.dataframe_siret[(self.dataframe_siret.etatAdministratifEtablissement == "A") & (self.dataframe_siret.libelleCommuneEtrangerEtablissement.isna())]
+                siret_df = siret_df[(siret_df.etatAdministratifEtablissement == "A") & (siret_df.libelleCommuneEtrangerEtablissement.isna())]
 
                 # identification type activitée
                 siret_df['codeTypeActivitePrincipaleEtablissement'] = siret_df['activitePrincipaleEtablissement'].apply(
@@ -163,8 +171,8 @@ class Siret:
 
                 return siret_df.copy()
             
-        except:
-            return None
+        except Exception as e:
+            logging.error('Erreur chargement base : %s', str(e))
         
     def get_siret_df(self):
         return self.siret_df

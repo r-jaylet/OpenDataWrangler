@@ -10,6 +10,7 @@
         
 """
 import logging
+import os
 import sys
 
 import pandas as pd
@@ -27,9 +28,13 @@ logging.basicConfig(level=logging.INFO)
 
 class Siren:
 
-    def __init__(self):
+    def __init__(self,
+                 path_root: str = r".",
+                 file_name: str = "StockUniteLegale_utf8.csv",):
         """constructor
         """
+        self.path_root = path_root
+        self.file_name = file_name
 
         # chargement initial des dictionnaires
         self.siren_df = self.load_siren_df()
@@ -46,33 +51,36 @@ class Siren:
         logging.info("Process SIREN")
 
         try:
-            # checks if document is present in file. If not, triggers the 'download()' function
-            document = ''
-            file_path = ''
-            filename_csv =''
 
+            # checks if document is present in file. If not, triggers the download function
             try:
-                with open(file_path, 'r') as file:
-                    if document not in file.read():
-                        download_file_sirene('UniteLegale')
-            except FileNotFoundError:
-                download_file_sirene('UniteLegale')
+                if self.file_name not in os.listdir(self.path_root):
+                    logging.info("Download Siren")
+                    download_file_sirene(self.path_root, 'UniteLegale')
+                else:
+                    logging.info("Siren already downloaded")
+            except:
+                logging.info("Download Siren")
+                download_file_sirene(self.path_root, 'UniteLegale')
 
-            siren_df = pd.read_csv(filename_csv,
-                        dtype={'siren': str,
-                                'trancheEffectifsUniteLegale': str,
-                                'categorieJuridiqueUniteLegale': str,
-                                'nicSiegeUniteLegale': str,
-                                'activiteUniteLegale': str},
-                        sep=',', nrows=100000)
-            
+            logging.info("Upload Siren")
+            path_file = os.path.join(self.path_root, self.file_name)
+            siren_df = pd.read_csv(path_file,
+                                   dtype={'siren': str,
+                                          'trancheEffectifsUniteLegale': str,
+                                          'categorieJuridiqueUniteLegale': str,
+                                          'nicSiegeUniteLegale': str,
+                                          'activiteUniteLegale': str},
+                                   sep=',', nrows=10000)
+
             if siren_df is not None:
-
+                logging.info("Processing Siren")
                 # élimination des unités purgées et cessées
                 siren_df = siren_df[(siren_df.unitePurgeeUniteLegale.isna()) & (siren_df.etatAdministratifUniteLegale == 'A')]
 
                 # identification type activitée
-                siren_df['codeTypeActivitePrincipaleUniteLegale'] = siren_df['activitePrincipaleUniteLegale'].apply(lambda x: x.split('.')[0] if type(x) == str else x)
+                siren_df['codeTypeActivitePrincipaleUniteLegale'] = siren_df['activitePrincipaleUniteLegale'].apply(lambda x: x.split('.')[
+                                                                                                                    0] if type(x) == str else x)
                 dict_type_activitees = {
                     'AGRICULTURE, SYLVICULTURE ET PÊCHE': ['01', '02', '03'],
                     'INDUSTRIES EXTRACTIVES': ['05', '06', '07', '08', '09'],
@@ -100,8 +108,7 @@ class Siren:
                     for code in codes:
                         data_type_activitees.append([activity, code])
                 df_type_activitees = pd.DataFrame(
-                    data_type_activitees, columns=['typeActivitePrincipaleUniteLegale',
-                                                'codeTypeActivitePrincipaleUniteLegale'])
+                    data_type_activitees, columns=['typeActivitePrincipaleUniteLegale', 'codeTypeActivitePrincipaleUniteLegale'])
 
                 siren_df = siren_df.merge(
                     df_type_activitees, how='left', on='codeTypeActivitePrincipaleUniteLegale').drop(
@@ -151,9 +158,9 @@ class Siren:
                 siren_df['pseudonymeUniteLegale'] = siren_df['pseudonymeUniteLegale'].str.upper()
 
                 return siren_df.copy()
-            
-        except:
-            return None
+
+        except Exception as e:
+            logging.error('Erreur chargement base : %s', str(e))
 
     def get_siren_df(self):
         return self.siren_df
