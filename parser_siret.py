@@ -30,7 +30,7 @@ class Siret:
 
     def __init__(self,
                  path_root: str = r".",
-                 file_name: str = "StockEtablissement_utf8.csv",):
+                 file_name: str = "StockEtablissement_utf8.csv"):
         """constructor
         """
         self.path_root = path_root

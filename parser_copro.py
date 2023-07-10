@@ -10,6 +10,7 @@
         
 """
 import logging
+import os
 import sys
 
 import pandas as pd
@@ -25,11 +26,15 @@ logger.addHandler(handler)
 logging.basicConfig(level=logging.INFO)
 
 
-class copro:
+class Copro:
 
-    def __init__(self):
+    def __init__(self,
+                 path_root: str = r".",
+                 file_name: str = "rnc-data-gouv-with-qpv.csv"):
         """constructor
         """
+        self.path_root = path_root
+        self.file_name = file_name
 
         # chargement initial des dictionnaires
         self.copro_df = self.load_copro_df()
@@ -44,18 +49,32 @@ class copro:
         """
 
         logging.info("Process copro")
-
         try:
-            copro_df = download_file_copro()
+            # checks if document is present in file. If not, triggers the download function
+            try:
+                if self.file_name not in os.listdir(self.path_root):
+                    logging.info("Download Copro")
+                    download_file_copro(self.path_root)
+                else:
+                    logging.info("Copro already downloaded")
+            except:
+                logging.info("Download Copro")
+                download_file_copro(self.path_root)
+
+            logging.info("Upload Copro")
+            path_file = os.path.join(self.path_root, self.file_name)
+            copro_df = pd.read_csv(path_file,
+                                   dtype={'Siret représentant légal (si existe)' : str},
+                                   sep=',', nrows=10000)
 
             if copro_df is not None:
-
-                copro_df = None
+                logging.info("Processing Copro")
+                copro_df = copro_df.copy()
 
                 return copro_df.copy()
             
-        except:
-            return None
+        except Exception as e:
+            logging.error('Erreur chargement base : %s', str(e))
 
     def get_copro_df(self):
         return self.copro_df
