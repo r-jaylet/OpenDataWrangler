@@ -32,5 +32,5 @@ def download_file_copro(path_root):
             file.write(response.content)
 
     except Exception as e:
-        logger.error('Récupération de la base copro : %s', str(e))
+        logging.error('Récupération de la base copro : %s', str(e))
         return None

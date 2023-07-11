@@ -30,4 +30,4 @@ def download_file_sirene(path_root, filename_sirene):
         os.remove(os.path.join(path_root, filename_zip))
 
     except Exception as e:
-        logger.error('Récupération de la base siren : %s', str(e))
+        logging.error('Récupération de la base siren : %s', str(e))
