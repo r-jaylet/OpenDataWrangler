@@ -75,7 +75,7 @@ def download_file_bodacc_api(path_root,
                              typeavis='',
                              familleavis='',
                              numerodepartement='',
-                             nrows = '10000'):    
+                             nrows='10000'):
     """Download last 10000 rows of bodacc data from bodacc api
     """
     try:
@@ -91,7 +91,11 @@ def download_file_bodacc_api(path_root,
         # stock in dataframe
         response = requests.get(url)
         bodacc_api = pd.DataFrame.from_records(response.json()['records'])
-        bodacc_api.to_csv(os.path.join(path_root, f'annonces-commerciales_{publicationavis}_{typeavis}_{familleavis}_{numerodepartement}_api.csv'), index=False)
-        
+        bodacc_api.to_csv(
+            os.path.join(
+                path_root,
+                f'annonces-commerciales_{publicationavis}_{typeavis}_{familleavis}_{numerodepartement}_api.csv'),
+            index=False)
+
     except Exception as e:
         logger.error('Bodacc data fetching : %s', str(e))
