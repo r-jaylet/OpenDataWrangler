@@ -3,8 +3,6 @@ import os
 import requests
 import sys
 
-import pandas as pd
-import wget
 
 logger = logging.getLogger('coprodownloadlogging')
 

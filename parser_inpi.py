@@ -1,20 +1,24 @@
-"""City & You Open Data Use Case Exploration
+"""OpenDataWrapper
 
     Summary
     -------
-        Manipulation des données sur les unités légales (inpi) de la base inpi
+        Manipulation des données sur les entrperises de la base INPI
 
     Documentation
     -------
-        Description générale inpi : https://www.data.gouv.fr/fr/datasets/base-inpi-des-entreprises-et-de-leurs-etablissements-inpi-siret/
-        
+        Description générale INPI : https://data.inpi.fr/content/editorial/Acces_API_Entreprises
+
+    Packages
+    -------
+        utils_inpi
 """
 import logging
+import os
 import sys
 
 import pandas as pd
 
-from old_utils.utils_inpi import download_file_inpi
+from utils.utils_inpi import (download_inpi_list)
 
 logger = logging.getLogger('inpilogging')
 
@@ -25,11 +29,15 @@ logger.addHandler(handler)
 logging.basicConfig(level=logging.INFO)
 
 
-class inpi:
+class Inpi:
 
-    def __init__(self):
+    def __init__(self,
+                 path_root: str = r".",
+                 sirenList: list = None):
         """constructor
         """
+        self.path_root = path_root
+        self.sirenList = sirenList
 
         # chargement initial des dictionnaires
         self.inpi_df = self.load_inpi_df()
@@ -46,16 +54,23 @@ class inpi:
         logging.info("Process inpi")
 
         try:
-            inpi_df = download_file_inpi()
-
+            print("a")
+            inpi_df = download_inpi_list(self.sirenList)
+            print("b")
             if inpi_df is not None:
+                print("c")
+                inpi_normalized_df = pd.json_normalize(inpi_df['formality'])
+                inpi_df = pd.concat(
+                    [inpi_df.drop('formality', axis=1),
+                     inpi_normalized_df.drop('siren', axis=1)],
+                    axis=1)
 
-                inpi_df = None
+                inpi_df.to_csv(os.path.join(self.path_root, 'inpi_df.csv'), index=False, sep=';')
 
                 return inpi_df.copy()
-            
-        except:
-            return None
+
+        except Exception as e:
+            logging.error('Erreur chargement base : %s', str(e))
 
     def get_inpi_df(self):
         return self.inpi_df

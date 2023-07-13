@@ -1,9 +1,7 @@
 import logging
 import os
 import sys
-import zipfile
 
-import pandas as pd
 import wget
 
 logger = logging.getLogger('majicdownloadlogging')

@@ -1,20 +1,21 @@
-"""City & You Open Data Use Case Exploration
+"""OpenDataWrapper
 
     Summary
     -------
-        Manipulation des données sur les unités légales (bodacc) de la base bodacc
+        Manipulation des données sur les annonces commerciales de la base BODACC (API)
 
     Documentation
     -------
-        Description générale bodacc : https://www.data.gouv.fr/fr/datasets/base-bodacc-des-entreprises-et-de-leurs-etablissements-bodacc-siret/
-        
+        Description générale BODACC : https://bodacc-datadila.opendatasoft.com/explore/dataset/annonces-commerciales/api/?sort=dateparution
+
+    Packages
+    -------
+        utils_bodacc
 """
 import logging
 import sys
 
-import pandas as pd
-
-from utils.utils_bodacc import download_file_bodacc
+from utils.utils_bodacc import (download_file_bodacc_api, download_file_bodacc_export)
 
 logger = logging.getLogger('bodacclogging')
 
@@ -25,7 +26,7 @@ logger.addHandler(handler)
 logging.basicConfig(level=logging.INFO)
 
 
-class bodacc:
+class Bodacc:
 
     def __init__(self):
         """constructor
@@ -46,14 +47,14 @@ class bodacc:
         logging.info("Process bodacc")
 
         try:
-            bodacc_df = download_file_bodacc()
-
+            # bodacc_df = utils_bodacc.download_file_bodacc()
+            bodacc_df = None
             if bodacc_df is not None:
 
                 bodacc_df = None
 
                 return bodacc_df.copy()
-            
+
         except:
             return None
 

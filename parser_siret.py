@@ -1,4 +1,4 @@
-"""City & You Open Data Use Case Exploration
+"""OpenDataWrapper
 
     Summary
     -------
@@ -6,8 +6,11 @@
 
     Documentation
     -------
-        Description générale SIRENE : https://www.data.gouv.fr/fr/datasets/base-sirete-des-entreprises-et-de-leurs-etablissements-siret-siret/
+        Description générale SIRENE : https://www.data.gouv.fr/fr/datasets/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/
 
+    Packages
+    -------
+        utils_sirene
 """
 import logging
 import os
@@ -15,7 +18,7 @@ import sys
 
 import pandas as pd
 
-from utils.utils_sirene import download_file_sirene
+from utils.utils_sirene import (download_file_sirene)
 
 logger = logging.getLogger('siretlogging')
 
@@ -66,17 +69,18 @@ class Siret:
             logging.info("Upload Siret")
             path_file = os.path.join(self.path_root, self.file_name)
             siret_df = pd.read_csv(path_file,
-                        dtype={'siren': str,
-                                'trancheEffectifsUniteLegale': str,
-                                'categorieJuridiqueUniteLegale': str,
-                                'nicSiegeUniteLegale': str,
-                                'activiteUniteLegale': str},
-                        sep=',', nrows=10000)
+                                   dtype={'siren': str,
+                                          'trancheEffectifsUniteLegale': str,
+                                          'categorieJuridiqueUniteLegale': str,
+                                          'nicSiegeUniteLegale': str,
+                                          'activiteUniteLegale': str},
+                                   sep=',', nrows=10000)
 
             if siret_df is not None:
                 logging.info("Processing Siret")
                 # élimination des unités purgées et cessées
-                siret_df = siret_df[(siret_df.etatAdministratifEtablissement == "A") & (siret_df.libelleCommuneEtrangerEtablissement.isna())]
+                siret_df = siret_df[(siret_df.etatAdministratifEtablissement == "A") &
+                                    (siret_df.libelleCommuneEtrangerEtablissement.isna())]
 
                 # identification type activitée
                 siret_df['codeTypeActivitePrincipaleEtablissement'] = siret_df['activitePrincipaleEtablissement'].apply(
@@ -131,48 +135,54 @@ class Siret:
                                 '51': '2000-4999',
                                 '52': '5000-9999',
                                 '53': '10000+'}
-                df_type_effectif = pd.DataFrame.from_dict(effectifCode, orient='index', columns=['significationTranche'])
+                df_type_effectif = pd.DataFrame.from_dict(
+                    effectifCode, orient='index', columns=['significationTranche'])
                 siret_df = pd.merge(siret_df, df_type_effectif, left_on='trancheEffectifsEtablissement',
                                     right_index=True, how='left')
                 siret_df = siret_df.drop('trancheEffectifsEtablissement', axis=1)
                 siret_df = siret_df.rename({'significationTranche': 'trancheEffectifsEtablissement'}, axis=1)
 
                 # format dates
-                siret_df['dateCreationEtablissement'] = pd.to_datetime(siret_df['dateCreationEtablissement'], errors='coerce')
-                siret_df['dateCreationEtablissement'] = siret_df['dateCreationEtablissement'].replace('1900-01-01', pd.NA)
-                siret_df['dateDernierTraitementEtablissement'] = pd.to_datetime(siret_df['dateDernierTraitementEtablissement'], errors='coerce')
-                siret_df['dateDernierTraitementEtablissement'] = siret_df['dateDernierTraitementEtablissement'].dt.strftime('%Y-%m-%d')
+                siret_df['dateCreationEtablissement'] = pd.to_datetime(
+                    siret_df['dateCreationEtablissement'], errors='coerce')
+                siret_df['dateCreationEtablissement'] = siret_df['dateCreationEtablissement'].replace(
+                    '1900-01-01', pd.NA)
+                siret_df['dateDernierTraitementEtablissement'] = pd.to_datetime(
+                    siret_df['dateDernierTraitementEtablissement'], errors='coerce')
+                siret_df['dateDernierTraitementEtablissement'] = siret_df['dateDernierTraitementEtablissement'].dt.strftime(
+                    '%Y-%m-%d')
 
                 # format names
                 siret_df['denominationUsuelleEtablissement'] = siret_df['denominationUsuelleEtablissement'].str.upper()
 
                 # ajout departement
-                siret_df['codeDepartementEtablissement'] = siret_df['codeCommuneEtablissement'].apply(lambda x: str(x)[:2])
+                siret_df['codeDepartementEtablissement'] = siret_df['codeCommuneEtablissement'].apply(lambda x: str(x)[
+                                                                                                      :2])
 
                 # post processing
                 siret_df = siret_df[['siren',
                                     'siret',
-                                    'denominationUsuelleEtablissement',
-                                    'dateCreationEtablissement',
-                                    'dateDernierTraitementEtablissement',
-                                    'trancheEffectifsEtablissement',
-                                    'etablissementSiege',
-                                    'complementAdresseEtablissement',
-                                    'numeroVoieEtablissement',
-                                    'indiceRepetitionEtablissement',
-                                    'typeVoieEtablissement',
-                                    'libelleVoieEtablissement',
-                                    'codePostalEtablissement',
-                                    'codeCommuneEtablissement',
-                                    'codeDepartementEtablissement',
-                                    'activitePrincipaleEtablissement',
-                                    'nomenclatureActivitePrincipaleEtablissement',
-                                    'typeActivitePrincipaleEtablissement']]
+                                     'denominationUsuelleEtablissement',
+                                     'dateCreationEtablissement',
+                                     'dateDernierTraitementEtablissement',
+                                     'trancheEffectifsEtablissement',
+                                     'etablissementSiege',
+                                     'complementAdresseEtablissement',
+                                     'numeroVoieEtablissement',
+                                     'indiceRepetitionEtablissement',
+                                     'typeVoieEtablissement',
+                                     'libelleVoieEtablissement',
+                                     'codePostalEtablissement',
+                                     'codeCommuneEtablissement',
+                                     'codeDepartementEtablissement',
+                                     'activitePrincipaleEtablissement',
+                                     'nomenclatureActivitePrincipaleEtablissement',
+                                     'typeActivitePrincipaleEtablissement']]
 
                 return siret_df.copy()
-            
+
         except Exception as e:
             logging.error('Erreur chargement base : %s', str(e))
-        
+
     def get_siret_df(self):
         return self.siret_df

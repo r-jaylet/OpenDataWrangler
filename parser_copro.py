@@ -1,13 +1,16 @@
-"""City & You Open Data Use Case Exploration
+"""OpenDataWrapper
 
     Summary
     -------
-        Manipulation des données sur les unités légales (copro) de la base copro
+        Manipulation des données sur les copropriétés de la base RNIC
 
     Documentation
     -------
-        Description générale copro : https://www.data.gouv.fr/fr/datasets/base-copro-des-entreprises-et-de-leurs-etablissements-copro-siret/
-        
+        Description générale RNIC : https://www.data.gouv.fr/fr/datasets/registre-national-dimmatriculation-des-coproprietes/)https://www.data.gouv.fr/fr/datasets/registre-national-dimmatriculation-des-coproprietes/
+
+    Packages
+    -------
+        utils_copro
 """
 import logging
 import os
@@ -15,7 +18,7 @@ import sys
 
 import pandas as pd
 
-from utils.utils_copro import download_file_copro
+from utils.utils_copro import (download_file_copro)
 
 logger = logging.getLogger('coprologging')
 
@@ -64,7 +67,7 @@ class Copro:
             logging.info("Upload Copro")
             path_file = os.path.join(self.path_root, self.file_name)
             copro_df = pd.read_csv(path_file,
-                                   dtype={'Siret représentant légal (si existe)' : str},
+                                   dtype={'Siret représentant légal (si existe)': str},
                                    sep=',', nrows=10000)
 
             if copro_df is not None:
@@ -72,7 +75,7 @@ class Copro:
                 copro_df = copro_df.copy()
 
                 return copro_df.copy()
-            
+
         except Exception as e:
             logging.error('Erreur chargement base : %s', str(e))
 

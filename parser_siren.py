@@ -1,4 +1,4 @@
-"""City & You Open Data Use Case Exploration
+"""OpenDataWrapper
 
     Summary
     -------
@@ -7,7 +7,10 @@
     Documentation
     -------
         Description générale SIRENE : https://www.data.gouv.fr/fr/datasets/base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret/
-        
+
+    Packages
+    -------
+        utils_sirene
 """
 import logging
 import os
@@ -15,7 +18,7 @@ import sys
 
 import pandas as pd
 
-from utils.utils_sirene import download_file_sirene
+from utils.utils_sirene import (download_file_sirene)
 
 logger = logging.getLogger('sirenlogging')
 
@@ -76,7 +79,8 @@ class Siren:
             if siren_df is not None:
                 logging.info("Processing Siren")
                 # élimination des unités purgées et cessées
-                siren_df = siren_df[(siren_df.unitePurgeeUniteLegale.isna()) & (siren_df.etatAdministratifUniteLegale == 'A')]
+                siren_df = siren_df[(siren_df.unitePurgeeUniteLegale.isna()) &
+                                    (siren_df.etatAdministratifUniteLegale == 'A')]
 
                 # identification type activitée
                 siren_df['codeTypeActivitePrincipaleUniteLegale'] = siren_df['activitePrincipaleUniteLegale'].apply(lambda x: x.split('.')[
@@ -108,7 +112,8 @@ class Siren:
                     for code in codes:
                         data_type_activitees.append([activity, code])
                 df_type_activitees = pd.DataFrame(
-                    data_type_activitees, columns=['typeActivitePrincipaleUniteLegale', 'codeTypeActivitePrincipaleUniteLegale'])
+                    data_type_activitees,
+                    columns=['typeActivitePrincipaleUniteLegale', 'codeTypeActivitePrincipaleUniteLegale'])
 
                 siren_df = siren_df.merge(
                     df_type_activitees, how='left', on='codeTypeActivitePrincipaleUniteLegale').drop(
@@ -131,20 +136,25 @@ class Siren:
                                 '51': '2000-4999',
                                 '52': '5000-9999',
                                 '53': '10000+'}
-                df_type_effectif = pd.DataFrame.from_dict(effectifCode, orient='index', columns=['significationTranche'])
+                df_type_effectif = pd.DataFrame.from_dict(
+                    effectifCode, orient='index', columns=['significationTranche'])
                 siren_df = pd.merge(siren_df, df_type_effectif, left_on='trancheEffectifsUniteLegale',
                                     right_index=True, how='left')
                 siren_df = siren_df.drop('trancheEffectifsUniteLegale', axis=1)
                 siren_df = siren_df.rename({'significationTranche': 'trancheEffectifsUniteLegale'}, axis=1)
 
                 # format data
-                siren_df['nicSiegeUniteLegale'] = siren_df['nicSiegeUniteLegale'].astype(str).apply(lambda x: x.zfill(5))
+                siren_df['nicSiegeUniteLegale'] = siren_df['nicSiegeUniteLegale'].astype(
+                    str).apply(lambda x: x.zfill(5))
 
                 # format dates
-                siren_df['dateCreationUniteLegale'] = pd.to_datetime(siren_df['dateCreationUniteLegale'], errors='coerce')
+                siren_df['dateCreationUniteLegale'] = pd.to_datetime(
+                    siren_df['dateCreationUniteLegale'], errors='coerce')
                 siren_df['dateCreationUniteLegale'] = siren_df['dateCreationUniteLegale'].replace('1900-01-01', pd.NA)
-                siren_df['dateDernierTraitementUniteLegale'] = pd.to_datetime(siren_df['dateDernierTraitementUniteLegale'], errors='coerce')
-                siren_df['dateDernierTraitementUniteLegale'] = siren_df['dateDernierTraitementUniteLegale'].dt.strftime('%Y-%m-%d')
+                siren_df['dateDernierTraitementUniteLegale'] = pd.to_datetime(
+                    siren_df['dateDernierTraitementUniteLegale'], errors='coerce')
+                siren_df['dateDernierTraitementUniteLegale'] = siren_df['dateDernierTraitementUniteLegale'].dt.strftime(
+                    '%Y-%m-%d')
 
                 # format names
                 siren_df['prenom1UniteLegale'] = siren_df['prenom1UniteLegale'].str.upper()

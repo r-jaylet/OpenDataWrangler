@@ -1,18 +1,21 @@
-"""City & You Open Data Use Case Exploration
+"""OpenDataWrapper
 
     Summary
     -------
-        Manipulation des données sur les unités légales (bdnb) de la base bdnb
+        Manipulation des données sur batiments de la base BDNB
 
     Documentation
     -------
-        Description générale bdnb : https://www.data.gouv.fr/fr/datasets/base-bdnb-des-entreprises-et-de-leurs-etablissements-bdnb-siret/
-        
+        Description générale BDNB : https://www.data.gouv.fr/fr/datasets/base-de-donnees-nationale-des-batiments/)https://www.data.gouv.fr/fr/datasets/base-de-donnees-nationale-des-batiments
+
+    Packages
+    -------
+        utils_bdnb
 """
 import logging
 import sys
 
-from utils.utils_bdnb import download_file_bdnb, extract_name_files_bdnb, extract_file_bdnb
+from utils.utils_bdnb import (download_file_bdnb, extract_file_bdnb, extract_name_files_bdnb)
 
 logger = logging.getLogger('bdnblogging')
 
